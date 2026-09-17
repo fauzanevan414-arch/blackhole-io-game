@@ -1,0 +1,6 @@
+{
+  "name": "Black Hole: City Eater",
+  "description": "Arcade-style Hole.io game featuring a black hole consuming city objects, dynamic growth, audio management, and responsive canvas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
