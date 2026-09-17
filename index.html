@@ -1000,14 +1000,19 @@
         this.d = config.d || this.radius * 1.6;
         this.h = config.h || 24;
 
-        // Orientasi & Variasi Gaya
-        this.rotation = fixedRotation;
-        this.styleSeed = Math.floor((Math.sin(x * 12.9898 + y * 78.233) * 0.5 + 0.5) * 4);
-
         // Pergerakan kendaraan di jalan raya
         this.isMoving = isMoving;
         this.vx = speedX;
         this.vy = speedY;
+
+        // Orientasi & Variasi Gaya
+        // Jika kendaraan sedang melaju di jalan, arahkan moncong depan (headlights) searah vektor geraknya
+        if (this.isMoving && (this.vx !== 0 || this.vy !== 0)) {
+          this.rotation = Math.atan2(this.vy, this.vx) + Math.PI / 2;
+        } else {
+          this.rotation = fixedRotation;
+        }
+        this.styleSeed = Math.floor((Math.sin(x * 12.9898 + y * 78.233) * 0.5 + 0.5) * 4);
 
         // Status penyerapan gravitasi (Vortex Suction)
         this.isBeingEaten = false;
@@ -1033,6 +1038,11 @@
             this.alive = false;
           }
         } else if (this.isMoving) {
+          // Moncong kendaraan selalu menghadap searah laju jalannya
+          if (this.vx !== 0 || this.vy !== 0) {
+            this.rotation = Math.atan2(this.vy, this.vx) + Math.PI / 2;
+          }
+
           // Kendaraan bergerak di jalurnya
           this.x += this.vx;
           this.y += this.vy;
@@ -1442,6 +1452,21 @@
             ctx.fillStyle = (this.typeKey === 'policeCar') ? '#f8fafc' : (this.typeKey === 'taxiCar' ? '#facc15' : this.color);
             ctx.fillRect(-r * 0.55, -r * 0.25, r * 1.1, r * 0.7);
 
+            // Sorot Lampu Depan (Headlight Beams) saat melaju
+            if (this.isMoving) {
+              const beamGrad = ctx.createLinearGradient(0, -r * 1.35, 0, -r * 1.35 - 55);
+              beamGrad.addColorStop(0, 'rgba(254, 240, 138, 0.45)');
+              beamGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
+              ctx.fillStyle = beamGrad;
+              ctx.beginPath();
+              ctx.moveTo(-r * 0.75, -r * 1.35);
+              ctx.lineTo(-r * 1.35, -r * 1.35 - 55);
+              ctx.lineTo(r * 1.35, -r * 1.35 - 55);
+              ctx.lineTo(r * 0.75, -r * 1.35);
+              ctx.closePath();
+              ctx.fill();
+            }
+
             // Lampu Depan (Headlights)
             ctx.fillStyle = '#fef08a';
             ctx.fillRect(-r * 0.7, -r * 1.35, 7, 4);
@@ -1475,6 +1500,21 @@
           }
 
           case 'cityBus': {
+            // Sorot Lampu Depan Bus
+            if (this.isMoving) {
+              const busBeam = ctx.createLinearGradient(0, -r * 1.65, 0, -r * 1.65 - 75);
+              busBeam.addColorStop(0, 'rgba(254, 240, 138, 0.48)');
+              busBeam.addColorStop(1, 'rgba(254, 240, 138, 0)');
+              ctx.fillStyle = busBeam;
+              ctx.beginPath();
+              ctx.moveTo(-r * 0.78, -r * 1.65);
+              ctx.lineTo(-r * 1.45, -r * 1.65 - 75);
+              ctx.lineTo(r * 1.45, -r * 1.65 - 75);
+              ctx.lineTo(r * 0.78, -r * 1.65);
+              ctx.closePath();
+              ctx.fill();
+            }
+
             // Bayangan bus panjang
             ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
             ctx.beginPath();
@@ -1516,6 +1556,21 @@
           }
 
           case 'motorcycle': {
+            // Sorot Lampu Depan Motor
+            if (this.isMoving) {
+              const motoBeam = ctx.createLinearGradient(0, -r * 0.7, 0, -r * 0.7 - 45);
+              motoBeam.addColorStop(0, 'rgba(254, 240, 138, 0.5)');
+              motoBeam.addColorStop(1, 'rgba(254, 240, 138, 0)');
+              ctx.fillStyle = motoBeam;
+              ctx.beginPath();
+              ctx.moveTo(-5, -r * 0.7);
+              ctx.lineTo(-16, -r * 0.7 - 45);
+              ctx.lineTo(16, -r * 0.7 - 45);
+              ctx.lineTo(5, -r * 0.7);
+              ctx.closePath();
+              ctx.fill();
+            }
+
             ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
             ctx.ellipse(2, 2, r * 0.6, r * 1.1, 0, 0, Math.PI * 2);
             ctx.fill();
@@ -2058,9 +2113,9 @@
               this.objects.push(new CityObject(innerLeft + 40, centerY, 'kiosk', Math.PI / 2));
               this.objects.push(new CityObject(innerRight - 40, centerY, -Math.PI / 2));
 
-              // Mobil eksekutif parkir di drop-off lobby
-              this.objects.push(new CityObject(centerX - 60, innerBottom - 40, 'sedanCar', 0));
-              this.objects.push(new CityObject(centerX + 60, innerBottom - 40, 'taxiCar', 0));
+              // Mobil eksekutif parkir di drop-off lobby (menghadap horizontal mengikuti lajur drop-off)
+              this.objects.push(new CityObject(centerX - 60, innerBottom - 40, 'sedanCar', Math.PI / 2));
+              this.objects.push(new CityObject(centerX + 60, innerBottom - 40, 'taxiCar', Math.PI / 2));
 
               // Tempat sampah & hidran plaza
               this.objects.push(new CityObject(innerLeft + 65, innerBottom - 25, 'trashCan'));
@@ -2075,9 +2130,9 @@
               // Kios / Minimarket di sisi samping
               this.objects.push(new CityObject(innerLeft + 45, centerY, 'kiosk', Math.PI / 2));
 
-              // Area parkir kantor dengan mobil terparkir rapi
-              this.objects.push(new CityObject(innerRight - 50, centerY - 35, 'sedanCar', 0));
-              this.objects.push(new CityObject(innerRight - 50, centerY + 35, 'motorcycle', 0));
+              // Area parkir kantor dengan mobil terparkir rapi di dalam slot parkir horizontal
+              this.objects.push(new CityObject(innerRight - 50, centerY - 35, 'sedanCar', Math.PI / 2));
+              this.objects.push(new CityObject(innerRight - 50, centerY + 35, 'motorcycle', Math.PI / 2));
 
               // Pohon peneduh kantor
               this.objects.push(new CityObject(innerLeft + 40, innerTop + 40, 'smallTree'));
@@ -2150,20 +2205,20 @@
         for (let r = 1; r < rows; r++) {
           const roadY = r * blockSize;
 
-          // Lajur ke Timur (Arah Kanan, Y + laneOffset, rotasi 0)
+          // Lajur ke Timur (Arah Kanan: vx > 0, rotasi Math.PI / 2)
           for (let k = 0; k < 4; k++) {
             const spawnX = (k * 900 + 150 + Math.random() * 200) % CONFIG.WORLD_WIDTH;
             const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
             const spd = 1.4 + Math.random() * 1.2;
-            this.objects.push(new CityObject(spawnX, roadY + laneOffset, type, 0, true, spd, 0));
+            this.objects.push(new CityObject(spawnX, roadY + laneOffset, type, Math.PI / 2, true, spd, 0));
           }
 
-          // Lajur ke Barat (Arah Kiri, Y - laneOffset, rotasi PI)
+          // Lajur ke Barat (Arah Kiri: vx < 0, rotasi -Math.PI / 2)
           for (let k = 0; k < 4; k++) {
             const spawnX = (k * 900 + 450 + Math.random() * 200) % CONFIG.WORLD_WIDTH;
             const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
             const spd = -(1.4 + Math.random() * 1.2);
-            this.objects.push(new CityObject(spawnX, roadY - laneOffset, type, Math.PI, true, spd, 0));
+            this.objects.push(new CityObject(spawnX, roadY - laneOffset, type, -Math.PI / 2, true, spd, 0));
           }
         }
 
@@ -2171,20 +2226,20 @@
         for (let c = 1; c < cols; c++) {
           const roadX = c * blockSize;
 
-          // Lajur ke Selatan (Arah Bawah, X + laneOffset, rotasi PI/2)
+          // Lajur ke Selatan (Arah Bawah: vy > 0, rotasi Math.PI)
           for (let k = 0; k < 4; k++) {
             const spawnY = (k * 900 + 200 + Math.random() * 200) % CONFIG.WORLD_HEIGHT;
             const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
             const spd = 1.4 + Math.random() * 1.2;
-            this.objects.push(new CityObject(roadX + laneOffset, spawnY, type, Math.PI / 2, true, 0, spd));
+            this.objects.push(new CityObject(roadX + laneOffset, spawnY, type, Math.PI, true, 0, spd));
           }
 
-          // Lajur ke Utara (Arah Atas, X - laneOffset, rotasi -PI/2)
+          // Lajur ke Utara (Arah Atas: vy < 0, rotasi 0)
           for (let k = 0; k < 4; k++) {
             const spawnY = (k * 900 + 600 + Math.random() * 200) % CONFIG.WORLD_HEIGHT;
             const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
             const spd = -(1.4 + Math.random() * 1.2);
-            this.objects.push(new CityObject(roadX - laneOffset, spawnY, type, -Math.PI / 2, true, 0, spd));
+            this.objects.push(new CityObject(roadX - laneOffset, spawnY, type, 0, true, 0, spd));
           }
         }
       }
@@ -2211,7 +2266,7 @@
             const goEast = Math.random() < 0.5;
             const spd = 1.4 + Math.random() * 1.2;
             const laneY = goEast ? roadY + laneOffset : roadY - laneOffset;
-            const rot = goEast ? 0 : Math.PI;
+            const rot = goEast ? Math.PI / 2 : -Math.PI / 2;
             const vx = goEast ? spd : -spd;
             const startX = goEast ? 10 : CONFIG.WORLD_WIDTH - 10;
             this.objects.push(new CityObject(startX, laneY, type, rot, true, vx, 0));
@@ -2221,7 +2276,7 @@
             const goSouth = Math.random() < 0.5;
             const spd = 1.4 + Math.random() * 1.2;
             const laneX = goSouth ? roadX + laneOffset : roadX - laneOffset;
-            const rot = goSouth ? Math.PI / 2 : -Math.PI / 2;
+            const rot = goSouth ? Math.PI : 0;
             const vy = goSouth ? spd : -spd;
             const startY = goSouth ? 10 : CONFIG.WORLD_HEIGHT - 10;
             this.objects.push(new CityObject(laneX, startY, type, rot, true, 0, vy));
@@ -2331,24 +2386,32 @@
         this.gameOverModal.classList.remove('hidden');
       }
 
-      // Deteksi Tumbukan & Penyerapan Objek
+      // Deteksi Tumbukan & Penyerapan Objek (Teroptimasi Bounding Box & Squared Distance)
       checkCollisions() {
         const pr = this.player.radius;
+        const px = this.player.x;
+        const py = this.player.y;
+        const maxThreshold = pr * 0.95;
+        const maxThresholdSq = maxThreshold * maxThreshold;
 
         for (let i = 0; i < this.objects.length; i++) {
           const obj = this.objects[i];
           if (!obj.alive) continue;
 
-          // Jarak Euclidean antara lubang hitam dan objek
-          const dx = this.player.x - obj.x;
-          const dy = this.player.y - obj.y;
-          const dist = Math.hypot(dx, dy);
+          // Eliminasi cepat dengan Bounding Box (skip 95% objek tanpa Math.hypot)
+          const dx = px - obj.x;
+          if (dx > maxThreshold || dx < -maxThreshold) continue;
+
+          const dy = py - obj.y;
+          if (dy > maxThreshold || dy < -maxThreshold) continue;
+
+          // Jarak Kuadrat Euclidean (ringan, tanpa akar kuadrat)
+          const distSq = dx * dx + dy * dy;
 
           // Batas syarat memakan: Objek harus lebih kecil dari lubang hitam
-          // Ukuran lubang harus minimal 1.1x lebih besar dari radius objek
           const canEat = pr > obj.radius * 1.08;
 
-          if (canEat && dist < pr * 0.95) {
+          if (canEat && distSq < maxThresholdSq) {
             // Objek mulai terhisap masuk pusaran
             if (!obj.isBeingEaten) {
               obj.isBeingEaten = true;
@@ -2373,7 +2436,8 @@
               }
 
               // Munculkan partikel cipratan
-              for (let p = 0; p < (isLargeObject ? 18 : 8); p++) {
+              const pCount = isLargeObject ? 12 : 6;
+              for (let p = 0; p < pCount; p++) {
                 this.particles.push(new Particle(obj.x, obj.y, obj.color));
               }
 
@@ -2502,14 +2566,19 @@
           this.screenShake = 0;
         }
 
-        // 2. RENDERING
+        // 2. RENDERING (Mulus 60 FPS dengan Viewport Culling)
         this.render();
-        this.renderMinimap();
+
+        // Minimap di-render setiap 2 frame untuk menghemat siklus GPU
+        this.minimapTick = (this.minimapTick || 0) + 1;
+        if (this.minimapTick % 2 === 0) {
+          this.renderMinimap();
+        }
 
         requestAnimationFrame((t) => this.gameLoop(t));
       }
 
-      // Render Lingkungan Kota dan Seluruh Entitas
+      // Render Lingkungan Kota dan Seluruh Entitas (Teroptimasi Viewport Frustum Culling)
       render() {
         const ctx = this.ctx;
         const vw = this.camera.viewportWidth;
@@ -2528,56 +2597,96 @@
         // Translasi Kamera ke koordinat pusat layar
         ctx.translate(-this.camera.x + vw / 2, -this.camera.y + vh / 2);
 
-        // 1. Render Tanah / Ground Aspal Kota
-        this.renderCityGround(ctx);
+        // Hitung batas pandang kamera di koordinat dunia (Viewport Culling Bounds)
+        const vMargin = 140;
+        const vLeft = this.camera.x - vw / 2 - vMargin;
+        const vRight = this.camera.x + vw / 2 + vMargin;
+        const vTop = this.camera.y - vh / 2 - vMargin;
+        const vBottom = this.camera.y + vh / 2 + vMargin;
 
-        // 2. Render Objek-Objek Kota yang BELUM ditelan
-        // Sortir berdasarkan koordinat Y untuk efek kedalaman / pseudo-3D overlap
-        const sortedObjects = [...this.objects].sort((a, b) => a.y - b.y);
+        // 1. Render Aspal & Elemen Tanah (Hanya blok yang terlihat di layar)
+        this.renderCityGround(ctx, vLeft, vRight, vTop, vBottom);
+
+        // 2. Filter Objek Aktif yang Masuk Viewport Kamera
+        const visibleObjects = [];
+        const eatingObjects = [];
+
+        for (let i = 0; i < this.objects.length; i++) {
+          const obj = this.objects[i];
+          if (!obj.alive) continue;
+
+          // Culling check dengan radius objek
+          const bound = obj.radius + 60;
+          if (obj.x + bound >= vLeft && obj.x - bound <= vRight &&
+              obj.y + bound >= vTop && obj.y - bound <= vBottom) {
+            if (obj.isBeingEaten) {
+              eatingObjects.push(obj);
+            } else {
+              visibleObjects.push(obj);
+            }
+          }
+        }
+
+        // Depth Sorting HANYA untuk objek yang tampak (~15-30 objek dari total 300+)
+        visibleObjects.sort((a, b) => a.y - b.y);
 
         // Objek yang belum tertelan digambar di atas tanah
-        sortedObjects.forEach(obj => {
-          if (!obj.isBeingEaten) {
-            obj.draw(ctx);
-          }
-        });
+        for (let i = 0; i < visibleObjects.length; i++) {
+          visibleObjects[i].draw(ctx);
+        }
 
-        // 3. Render Lubang Hitam
+        // 3. Render Lubang Hitam Pemain
         this.player.draw(ctx);
 
-        // 4. Objek yang SEDANG tersedot digambar di DALAM lubang hitam
-        sortedObjects.forEach(obj => {
-          if (obj.isBeingEaten) {
-            obj.draw(ctx);
+        // 4. Objek yang sedang tersedot ke pusaran
+        for (let i = 0; i < eatingObjects.length; i++) {
+          eatingObjects[i].draw(ctx);
+        }
+
+        // 5. Partikel Efek (hanya yang dalam viewport)
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          if (p.x >= vLeft && p.x <= vRight && p.y >= vTop && p.y <= vBottom) {
+            p.draw(ctx);
           }
-        });
+        }
 
-        // 5. Render Partikel Ledakan / Debu
-        this.particles.forEach(p => p.draw(ctx));
-
-        // 6. Batas Tepi Dunia (World Borders)
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 10;
-        ctx.strokeRect(0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
+        // 6. Batas Tepi Dunia (World Borders) jika tampak di layar
+        if (vLeft < 0 || vRight > CONFIG.WORLD_WIDTH || vTop < 0 || vBottom > CONFIG.WORLD_HEIGHT) {
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 10;
+          ctx.strokeRect(0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
+        }
 
         ctx.restore();
       }
 
-      // Render Pola Jalan Raya, Trotoar, Zebra Cross, dan Blok Kota Beraturan
-      renderCityGround(ctx) {
+      // Render Pola Jalan Raya, Trotoar, Zebra Cross, dan Blok Kota Beraturan (Frustum-Culled)
+      renderCityGround(ctx, vLeft, vRight, vTop, vBottom) {
         const blockSize = CONFIG.BLOCK_SIZE; // 600
         const roadWidth = CONFIG.ROAD_WIDTH; // 110
         const sidewalkWidth = CONFIG.SIDEWALK_WIDTH; // 32
         const cols = Math.floor(CONFIG.WORLD_WIDTH / blockSize);
         const rows = Math.floor(CONFIG.WORLD_HEIGHT / blockSize);
 
-        // 1. Dasar Aspal Gelap Seluruh Dunia Permainan
-        ctx.fillStyle = '#0a0f1d';
-        ctx.fillRect(0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
+        // 1. Dasar Aspal: HANYA isi viewport yang terlihat, bukan seluruh 3600x3600
+        const fillL = Math.max(0, vLeft);
+        const fillR = Math.min(CONFIG.WORLD_WIDTH, vRight);
+        const fillT = Math.max(0, vTop);
+        const fillB = Math.min(CONFIG.WORLD_HEIGHT, vBottom);
 
-        // 2. Render Blok Trotoar & Kavling Distrik
-        for (let bx = 0; bx < cols; bx++) {
-          for (let by = 0; by < rows; by++) {
+        ctx.fillStyle = '#0a0f1d';
+        ctx.fillRect(fillL, fillT, fillR - fillL, fillB - fillT);
+
+        // 2. Tentukan rentang indeks blok kota yang masuk dalam bidang pandang
+        const minBx = Math.max(0, Math.floor(vLeft / blockSize));
+        const maxBx = Math.min(cols - 1, Math.floor(vRight / blockSize));
+        const minBy = Math.max(0, Math.floor(vTop / blockSize));
+        const maxBy = Math.min(rows - 1, Math.floor(vBottom / blockSize));
+
+        // Render Blok Trotoar & Kavling Distrik yang tampak saja
+        for (let bx = minBx; bx <= maxBx; bx++) {
+          for (let by = minBy; by <= maxBy; by++) {
             const blockLeft = bx * blockSize + roadWidth / 2;
             const blockRight = (bx + 1) * blockSize - roadWidth / 2;
             const blockTop = by * blockSize + roadWidth / 2;
@@ -2585,7 +2694,7 @@
             const blockW = blockRight - blockLeft;
             const blockH = blockBottom - blockTop;
 
-            // Dasar Trotoar Beton Keliling (Sidewalk Slab)
+            // Dasar Trotoar Beton Keliling
             ctx.fillStyle = '#1e293b';
             ctx.fillRect(blockLeft, blockTop, blockW, blockH);
 
@@ -2609,7 +2718,7 @@
               ctx.fillStyle = '#14462c';
               ctx.fillRect(innerLeft, innerTop, innerW, innerH);
 
-              // Jalur Setapak Batu Pejalan Kaki (Cross Stone Walkways)
+              // Jalur Setapak Batu Pejalan Kaki
               ctx.fillStyle = '#293548';
               ctx.fillRect(innerLeft, innerTop + innerH / 2 - 14, innerW, 28);
               ctx.fillRect(innerLeft + innerW / 2 - 14, innerTop, 28, innerH);
@@ -2629,21 +2738,19 @@
               ctx.fillStyle = '#172033';
               ctx.fillRect(innerLeft, innerTop, innerW, innerH);
 
-              // Motif Grid Ubin Plaza
+              // Motif Grid Ubin Plaza (DIBATCH DALAM SATU PATH)
               ctx.strokeStyle = '#223049';
               ctx.lineWidth = 1;
-              for (let px = innerLeft + 35; px < innerLeft + innerW; px += 35) {
-                ctx.beginPath();
+              ctx.beginPath();
+              for (let px = innerLeft + 45; px < innerLeft + innerW; px += 45) {
                 ctx.moveTo(px, innerTop);
                 ctx.lineTo(px, innerTop + innerH);
-                ctx.stroke();
               }
-              for (let py = innerTop + 35; py < innerTop + innerH; py += 35) {
-                ctx.beginPath();
+              for (let py = innerTop + 45; py < innerTop + innerH; py += 45) {
                 ctx.moveTo(innerLeft, py);
                 ctx.lineTo(innerLeft + innerW, py);
-                ctx.stroke();
               }
+              ctx.stroke();
 
               // Garis Drop-off Lobby
               ctx.strokeStyle = '#38bdf8';
@@ -2688,65 +2795,70 @@
           }
         }
 
-        // 3. Marka Jalan Raya (Marka Lajur & Garis Ganda Kuning)
+        // 3. Marka Jalan Raya (Hanya jalan yang melintasi viewport)
         // A. Jalan Horizontal
         for (let r = 1; r < rows; r++) {
           const y = r * blockSize;
+          if (y + roadWidth / 2 < vTop || y - roadWidth / 2 > vBottom) continue;
 
-          // Garis tengah jalan ganda kuning (Double Solid Yellow)
+          // Garis tengah jalan ganda kuning
           ctx.strokeStyle = '#eab308';
           ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.moveTo(0, y - 3);
-          ctx.lineTo(CONFIG.WORLD_WIDTH, y - 3);
-          ctx.moveTo(0, y + 3);
-          ctx.lineTo(CONFIG.WORLD_WIDTH, y + 3);
+          ctx.moveTo(fillL, y - 3);
+          ctx.lineTo(fillR, y - 3);
+          ctx.moveTo(fillL, y + 3);
+          ctx.lineTo(fillR, y + 3);
           ctx.stroke();
 
           // Garis batas luar jalan putih tipis
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.moveTo(0, y - roadWidth / 2);
-          ctx.lineTo(CONFIG.WORLD_WIDTH, y - roadWidth / 2);
-          ctx.moveTo(0, y + roadWidth / 2);
-          ctx.lineTo(CONFIG.WORLD_WIDTH, y + roadWidth / 2);
+          ctx.moveTo(fillL, y - roadWidth / 2);
+          ctx.lineTo(fillR, y - roadWidth / 2);
+          ctx.moveTo(fillL, y + roadWidth / 2);
+          ctx.lineTo(fillR, y + roadWidth / 2);
           ctx.stroke();
         }
 
         // B. Jalan Vertikal
         for (let c = 1; c < cols; c++) {
           const x = c * blockSize;
+          if (x + roadWidth / 2 < vLeft || x - roadWidth / 2 > vRight) continue;
 
           // Garis tengah jalan ganda kuning
           ctx.strokeStyle = '#eab308';
           ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.moveTo(x - 3, 0);
-          ctx.lineTo(x - 3, CONFIG.WORLD_HEIGHT);
-          ctx.moveTo(x + 3, 0);
-          ctx.lineTo(x + 3, CONFIG.WORLD_HEIGHT);
+          ctx.moveTo(x - 3, fillT);
+          ctx.lineTo(x - 3, fillB);
+          ctx.moveTo(x + 3, fillT);
+          ctx.lineTo(x + 3, fillB);
           ctx.stroke();
 
           // Garis batas luar jalan putih tipis
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.moveTo(x - roadWidth / 2, 0);
-          ctx.lineTo(x - roadWidth / 2, CONFIG.WORLD_HEIGHT);
-          ctx.moveTo(x + roadWidth / 2, 0);
-          ctx.lineTo(x + roadWidth / 2, CONFIG.WORLD_HEIGHT);
+          ctx.moveTo(x - roadWidth / 2, fillT);
+          ctx.lineTo(x - roadWidth / 2, fillB);
+          ctx.moveTo(x + roadWidth / 2, fillT);
+          ctx.lineTo(x + roadWidth / 2, fillB);
           ctx.stroke();
         }
 
-        // 4. Zebra Crossings & Garis Henti di Setiap Persimpangan Jalan
+        // 4. Zebra Crossings & Garis Henti di Persimpangan (Hanya yang tampak)
         const zebraW = 28;
         const zebraDist = roadWidth / 2 + 10;
 
         for (let c = 1; c < cols; c++) {
+          const ix = c * blockSize;
+          if (ix + roadWidth < vLeft || ix - roadWidth > vRight) continue;
+
           for (let r = 1; r < rows; r++) {
-            const ix = c * blockSize;
             const iy = r * blockSize;
+            if (iy + roadWidth < vTop || iy - roadWidth > vBottom) continue;
 
             // Kotak aspal persimpangan
             ctx.fillStyle = '#0f172a';
@@ -2785,54 +2897,52 @@
         }
       }
 
-      // Render Radar Mini di pojok kanan bawah
+      // Render Radar Mini di pojok kanan bawah (Teroptimasi)
       renderMinimap() {
         const mCtx = this.minimapCtx;
         const mw = this.minimapCanvas.width;
         const mh = this.minimapCanvas.height;
 
-        mCtx.clearRect(0, 0, mw, mh);
-
-        // Latar belakang minimap
-        mCtx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        mCtx.fillStyle = 'rgba(15, 23, 42, 0.95)';
         mCtx.fillRect(0, 0, mw, mh);
 
         const scaleX = mw / CONFIG.WORLD_WIDTH;
         const scaleY = mh / CONFIG.WORLD_HEIGHT;
 
-        // Gambar Grid Jalan Raya di Minimap
+        // Gambar Grid Jalan Raya di Minimap (Batch Path)
         mCtx.strokeStyle = 'rgba(51, 65, 85, 0.7)';
         mCtx.lineWidth = 1;
+        mCtx.beginPath();
         const blockSize = CONFIG.BLOCK_SIZE;
         for (let x = blockSize; x < CONFIG.WORLD_WIDTH; x += blockSize) {
-          mCtx.beginPath();
           mCtx.moveTo(x * scaleX, 0);
           mCtx.lineTo(x * scaleX, mh);
-          mCtx.stroke();
         }
         for (let y = blockSize; y < CONFIG.WORLD_HEIGHT; y += blockSize) {
-          mCtx.beginPath();
           mCtx.moveTo(0, y * scaleY);
           mCtx.lineTo(mw, y * scaleY);
-          mCtx.stroke();
         }
+        mCtx.stroke();
 
-        // Titik-titik objek kota
+        // Objek Besar (Batching fillStyle untuk performa)
+        mCtx.fillStyle = '#38bdf8';
         for (let i = 0; i < this.objects.length; i += 2) {
           const obj = this.objects[i];
-          if (obj.category === 'LARGE') {
-            mCtx.fillStyle = '#38bdf8';
+          if (obj.alive && obj.category === 'LARGE') {
             mCtx.fillRect(obj.x * scaleX - 1.5, obj.y * scaleY - 1.5, 3, 3);
-          } else if (obj.category === 'MEDIUM') {
-            mCtx.fillStyle = '#f59e0b';
-            mCtx.fillRect(obj.x * scaleX - 1, obj.y * scaleY - 1, 2, 2);
-          } else {
-            mCtx.fillStyle = 'rgba(148, 163, 184, 0.5)';
-            mCtx.fillRect(obj.x * scaleX, obj.y * scaleY, 1, 1);
           }
         }
 
-        // Posisi Lubang Hitam Pemain (Titik Cyan Terang Berkedip)
+        // Objek Sedang
+        mCtx.fillStyle = '#f59e0b';
+        for (let i = 0; i < this.objects.length; i += 2) {
+          const obj = this.objects[i];
+          if (obj.alive && obj.category === 'MEDIUM') {
+            mCtx.fillRect(obj.x * scaleX - 1, obj.y * scaleY - 1, 2, 2);
+          }
+        }
+
+        // Posisi Lubang Hitam Pemain (Titik Cyan Terang)
         mCtx.fillStyle = '#00f2fe';
         mCtx.beginPath();
         mCtx.arc(this.player.x * scaleX, this.player.y * scaleY, Math.max(3, this.player.radius * scaleX * 1.5), 0, Math.PI * 2);
