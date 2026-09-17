@@ -1,4 +1,4 @@
-# Hole.io Web Game 🕳️✨
+# BlackHole: City Eater Web Game 🕳️✨
 
 Game arcade berbasis web bertema *black hole* (lubang hitam) di mana pemain harus menggerakkan lubang untuk melahap berbagai objek di sekitar, memperbesar ukuran, dan meraih skor tertinggi sebelum waktu habis!
 
