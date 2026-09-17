@@ -1,4 +1,4 @@
-# Hole.io Web Game 🕳️✨
+# BlackHole: City Eater Web Game 🕳️✨
 
 [![Play Online](https://img.shields.io/badge/Play-Live%20Demo-brightgreen?style=for-the-badge&logo=netlify)](https://blackhole-cityeater.netlify.app)
 
