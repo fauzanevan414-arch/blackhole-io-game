@@ -626,6 +626,9 @@
     const CONFIG = {
       WORLD_WIDTH: 3600,
       WORLD_HEIGHT: 3600,
+      BLOCK_SIZE: 600,
+      ROAD_WIDTH: 110,
+      SIDEWALK_WIDTH: 32,
       GAME_DURATION: 60, // 60 detik
       INITIAL_HOLE_RADIUS: 28,
       MAX_HOLE_RADIUS: 220,
@@ -821,55 +824,55 @@
     // ==========================================================================
     // 3. OBJECT TYPES & CITY BLUEPRINTS
     // ==========================================================================
-    // Definisi tipe objek kota dengan ukuran, poin, dan warna render
+    // Definisi tipe objek kota dengan ukuran, poin, dimensi 2.5D, dan warna render realistis
     const OBJECT_CATALOG = {
-      // --- KELOMPOK KECIL ---
+      // --- KELOMPOK KECIL (Street Props & Sidewalk Elements) ---
       hydrant: {
         category: 'SMALL',
         radius: 12,
         height: 18,
         points: 10,
         growth: 0.45,
-        color: '#ef4444',
+        color: '#dc2626',
         accentColor: '#fca5a5',
         label: 'Hidran Air'
       },
       trashCan: {
         category: 'SMALL',
-        radius: 14,
-        height: 22,
+        radius: 13,
+        height: 20,
         points: 15,
-        growth: 0.55,
-        color: '#64748b',
-        accentColor: '#94a3b8',
-        label: 'Tong Sampah'
+        growth: 0.5,
+        color: '#475569',
+        accentColor: '#10b981',
+        label: 'Tong Sampah Kota'
       },
       streetLamp: {
         category: 'SMALL',
-        radius: 16,
-        height: 35,
+        radius: 15,
+        height: 38,
         points: 20,
-        growth: 0.65,
+        growth: 0.6,
         color: '#334155',
         accentColor: '#fef08a',
-        label: 'Lampu Jalan'
+        label: 'Lampu Jalan LED'
       },
       smallTree: {
         category: 'SMALL',
-        radius: 22,
-        height: 38,
+        radius: 20,
+        height: 36,
         points: 30,
-        growth: 0.85,
-        color: '#16a34a',
+        growth: 0.8,
+        color: '#15803d',
         accentColor: '#78350f',
-        label: 'Pohon Taman'
+        label: 'Pohon Peneduh'
       },
 
-      // --- KELOMPOK SEDANG ---
+      // --- KELOMPOK SEDANG (Kendaraan & Fasilitas Usaha) ---
       motorcycle: {
         category: 'MEDIUM',
-        radius: 28,
-        height: 24,
+        radius: 26,
+        height: 22,
         points: 50,
         growth: 1.1,
         color: '#0284c7',
@@ -878,75 +881,97 @@
       },
       sedanCar: {
         category: 'MEDIUM',
-        radius: 38,
-        height: 30,
+        radius: 36,
+        height: 28,
         points: 80,
-        growth: 1.6,
-        color: '#dc2626',
-        accentColor: '#cbd5e1',
+        growth: 1.5,
+        color: '#2563eb',
+        accentColor: '#93c5fd',
         label: 'Mobil Sedan'
       },
       taxiCar: {
         category: 'MEDIUM',
-        radius: 40,
-        height: 32,
+        radius: 38,
+        height: 30,
         points: 90,
-        growth: 1.8,
-        color: '#facc15',
-        accentColor: '#1e293b',
-        label: 'Taksi Kota'
+        growth: 1.7,
+        color: '#eab308',
+        accentColor: '#0f172a',
+        label: 'Taksi Eksekutif'
+      },
+      policeCar: {
+        category: 'MEDIUM',
+        radius: 38,
+        height: 30,
+        points: 110,
+        growth: 1.9,
+        color: '#0f172a',
+        accentColor: '#38bdf8',
+        label: 'Mobil Patroli Polisi'
       },
       kiosk: {
         category: 'MEDIUM',
-        radius: 48,
-        height: 44,
-        points: 130,
-        growth: 2.2,
-        color: '#d97706',
+        radius: 46,
+        w: 68,
+        d: 58,
+        h: 22,
+        height: 42,
+        points: 140,
+        growth: 2.3,
+        color: '#b45309',
         accentColor: '#fed7aa',
-        label: 'Kios Makanan'
+        label: 'Kafe & Kios Jalan'
       },
       cityBus: {
         category: 'MEDIUM',
-        radius: 58,
-        height: 42,
-        points: 180,
-        growth: 2.8,
-        color: '#2563eb',
-        accentColor: '#93c5fd',
-        label: 'Bus Kota'
+        radius: 56,
+        height: 38,
+        points: 190,
+        growth: 2.9,
+        color: '#0284c7',
+        accentColor: '#ffffff',
+        label: 'Bus Kota Metro'
       },
 
-      // --- KELOMPOK BESAR ---
+      // --- KELOMPOK BESAR (Bangunan Arsitektur Nyata) ---
       smallHouse: {
         category: 'LARGE',
-        radius: 72,
-        height: 60,
-        points: 280,
-        growth: 3.5,
-        color: '#b45309',
+        radius: 68,
+        w: 96,
+        d: 84,
+        h: 26,
+        height: 55,
+        points: 300,
+        growth: 3.6,
+        color: '#9a3412',
         accentColor: '#fde68a',
-        label: 'Rumah Warga'
+        label: 'Rumah Tinggal Suburb'
       },
       officeBuilding: {
         category: 'LARGE',
-        radius: 95,
+        radius: 96,
+        w: 135,
+        d: 115,
+        h: 48,
         height: 90,
-        points: 500,
-        growth: 4.8,
-        color: '#475569',
+        points: 550,
+        growth: 5.2,
+        color: '#334155',
         accentColor: '#38bdf8',
-        label: 'Gedung Kantor'
+        label: 'Gedung Perkantoran'
       },
       skyscraper: {
         category: 'LARGE',
-        radius: 125,
-        height: 140,
-        points: 950,
-        growth: 7.0,
-        color: '#1e293b',
-        accentColor: '#c084fc',
-        label: 'Pencakar Langit'
+        radius: 135,
+        w: 175,
+        d: 155,
+        h: 75,
+        height: 150,
+        points: 1050,
+        growth: 7.5,
+        color: '#0f172a',
+        accentColor: '#00f2fe',
+        label: 'Pencakar Langit Megah'
       }
     };
 
@@ -954,13 +979,13 @@
     // 4. ENTITY CLASSES (CITY OBJECT & BLACK HOLE)
     // ==========================================================================
 
-    // Kelas Objek Kota yang bisa dimakan
+    // Kelas Objek Kota yang bisa dimakan dengan detail visual realistis 2.5D
     class CityObject {
-      constructor(x, y, typeKey) {
+      constructor(x, y, typeKey, fixedRotation = 0, isMoving = false, speedX = 0, speedY = 0) {
         this.x = x;
         this.y = y;
         this.typeKey = typeKey;
-        const config = OBJECT_CATALOG[typeKey];
+        const config = OBJECT_CATALOG[typeKey] || OBJECT_CATALOG.hydrant;
         this.category = config.category;
         this.radius = config.radius;
         this.height = config.height;
@@ -970,38 +995,62 @@
         this.accentColor = config.accentColor;
         this.label = config.label;
 
-        // Variasi rotasi visual
-        this.rotation = Math.random() * Math.PI * 2;
+        // Dimensi arsitektur 2.5D
+        this.w = config.w || this.radius * 1.8;
+        this.d = config.d || this.radius * 1.6;
+        this.h = config.h || 24;
+
+        // Orientasi & Variasi Gaya
+        this.rotation = fixedRotation;
+        this.styleSeed = Math.floor((Math.sin(x * 12.9898 + y * 78.233) * 0.5 + 0.5) * 4);
+
+        // Pergerakan kendaraan di jalan raya
+        this.isMoving = isMoving;
+        this.vx = speedX;
+        this.vy = speedY;
 
         // Status penyerapan gravitasi (Vortex Suction)
         this.isBeingEaten = false;
         this.scale = 1.0;
-        this.suctionSpeed = 0.08;
-        this.eatenAngle = 0;
         this.alive = true;
       }
 
-      // Animasi saat ditarik ke dalam lubang
-      updateSuction(holeX, holeY) {
-        if (!this.isBeingEaten) return;
+      // Update pergerakan lalu lintas atau penyerapan pusaran
+      update(dt, holeX, holeY) {
+        if (this.isBeingEaten) {
+          // Tarik menuju pusat lubang hitam
+          const dx = holeX - this.x;
+          const dy = holeY - this.y;
+          this.x += dx * 0.16;
+          this.y += dy * 0.16;
 
-        // Tarik menuju pusat lubang
-        const dx = holeX - this.x;
-        const dy = holeY - this.y;
-        this.x += dx * 0.16;
-        this.y += dy * 0.16;
+          // Putar dan perkecil saat tenggelam
+          this.rotation += 0.22;
+          this.scale -= 0.055;
 
-        // Putar saat berputar ke pusaran
-        this.rotation += 0.25;
-        this.scale -= 0.055;
+          if (this.scale <= 0.05) {
+            this.scale = 0;
+            this.alive = false;
+          }
+        } else if (this.isMoving) {
+          // Kendaraan bergerak di jalurnya
+          this.x += this.vx;
+          this.y += this.vy;
 
-        if (this.scale <= 0.05) {
-          this.scale = 0;
-          this.alive = false;
+          // Looping batas jalan kota (wrap-around)
+          if (this.x < 50) this.x = CONFIG.WORLD_WIDTH - 50;
+          if (this.x > CONFIG.WORLD_WIDTH - 50) this.x = 50;
+          if (this.y < 50) this.y = CONFIG.WORLD_HEIGHT - 50;
+          if (this.y > CONFIG.WORLD_HEIGHT - 50) this.y = 50;
         }
       }
 
-      // Render objek dengan gaya pseudo-3D isometrik / top-down
+      // Backward compatible suction call
+      updateSuction(holeX, holeY) {
+        this.update(0.016, holeX, holeY);
+      }
+
+      // Render objek dengan grafis pseudo-3D isometrik / arsitektur realistis
       draw(ctx) {
         if (!this.alive || this.scale <= 0) return;
 
@@ -1011,139 +1060,617 @@
         ctx.rotate(this.rotation);
 
         const r = this.radius;
+        const w = this.w;
+        const d = this.d;
+        const h = this.h;
 
-        // Gambar bayangan jatuh (Drop Shadow)
-        ctx.beginPath();
-        ctx.ellipse(r * 0.2, r * 0.25, r * 1.05, r * 0.7, 0, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
-        ctx.fill();
-
-        // Render sesuai tipe visual
+        // Render sesuai tipe objek arsitektur / perkotaan
         switch (this.typeKey) {
-          case 'hydrant':
-            // Badan silinder hidran merah
-            ctx.fillStyle = this.color;
+          // ==========================================
+          // 1. PENCAKAR LANGIT MODERN (SKYSCRAPER)
+          // ==========================================
+          case 'skyscraper': {
+            // Bayangan jatuh luas (Drop Shadow)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
             ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.ellipse(30, 40, w * 0.65, d * 0.55, 0.2, 0, Math.PI * 2);
             ctx.fill();
-            // Kepala hidran
-            ctx.fillStyle = this.accentColor;
-            ctx.beginPath();
-            ctx.arc(0, -2, r * 0.55, 0, Math.PI * 2);
-            ctx.fill();
-            break;
 
-          case 'trashCan':
-            ctx.fillStyle = this.color;
-            ctx.fillRect(-r, -r, r * 2, r * 2);
-            ctx.fillStyle = this.accentColor;
-            ctx.fillRect(-r * 0.8, -r * 0.8, r * 1.6, r * 0.4);
-            break;
+            // Plinth / Plaza dasar gedung (Granite base)
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.roundRect(-w / 2 - 8, -d / 2 - 8 + h, w + 16, d + 16, 6);
+            ctx.fill();
 
-          case 'streetLamp':
-            // Tiang dasar
-            ctx.fillStyle = this.color;
+            // Dinding Facade Bawah / Sisi Gedung (Dinding kaca gelap dengan bayangan gradasi)
+            const facadeGrad = ctx.createLinearGradient(0, -d / 2, 0, d / 2 + h);
+            facadeGrad.addColorStop(0, '#1e293b');
+            facadeGrad.addColorStop(0.6, '#0f172a');
+            facadeGrad.addColorStop(1, '#020617');
+            ctx.fillStyle = facadeGrad;
             ctx.beginPath();
-            ctx.arc(0, 0, r * 0.6, 0, Math.PI * 2);
+            ctx.roundRect(-w / 2, -d / 2 + h, w, d, 4);
             ctx.fill();
-            // Lampu bercahaya
-            ctx.fillStyle = this.accentColor;
-            ctx.beginPath();
-            ctx.arc(0, -r * 0.5, r * 0.55, 0, Math.PI * 2);
-            ctx.fill();
-            // Pijar halo lembut
-            ctx.fillStyle = 'rgba(254, 240, 138, 0.25)';
-            ctx.beginPath();
-            ctx.arc(0, -r * 0.5, r * 1.2, 0, Math.PI * 2);
-            ctx.fill();
-            break;
 
-          case 'smallTree':
-            // Batang
-            ctx.fillStyle = this.accentColor;
-            ctx.beginPath();
-            ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
-            ctx.fill();
-            // Dedaunan pohon (lingkaran bertingkat)
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#22c55e';
-            ctx.beginPath();
-            ctx.arc(-r * 0.2, -r * 0.2, r * 0.65, 0, Math.PI * 2);
-            ctx.fill();
-            break;
+            // Grid Jendela Dinding Facade (Tirai Kaca Reflektif Biru Neon)
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
+            const cols = 7;
+            const rows = 5;
+            const colW = (w - 24) / cols;
+            const rowH = (d - 20) / rows;
+            for (let c = 0; c < cols; c++) {
+              for (let rIdx = 0; rIdx < rows; rIdx++) {
+                const jx = -w / 2 + 12 + c * colW;
+                const jy = -d / 2 + h + 10 + rIdx * rowH;
+                ctx.fillRect(jx, jy, colW * 0.72, rowH * 0.65);
+              }
+            }
 
-          case 'motorcycle':
+            // Pintu Masuk Megah Lantai Dasar (Entrance Canopy)
+            ctx.fillStyle = '#0284c7';
+            ctx.fillRect(-w * 0.2, d / 2 + h - 6, w * 0.4, 6);
+            ctx.fillStyle = 'rgba(254, 240, 138, 0.85)';
+            ctx.fillRect(-w * 0.16, d / 2 + h - 14, w * 0.32, 8);
+
+            // Plat Atap Utama (Main Rooftop Slab)
+            const roofGrad = ctx.createLinearGradient(-w / 2, -d / 2, w / 2, d / 2);
+            roofGrad.addColorStop(0, '#334155');
+            roofGrad.addColorStop(1, '#1e293b');
+            ctx.fillStyle = roofGrad;
+            ctx.beginPath();
+            ctx.roundRect(-w / 2, -d / 2, w, d, 4);
+            ctx.fill();
+
+            // Parapet Dinding Pembatas Tepi Atap (Coping Stones)
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-w / 2 + 2, -d / 2 + 2, w - 4, d - 4);
+
+            // HELIPAD RESMI DI ATAP GEDUNG
+            const heliR = Math.min(w, d) * 0.26;
+            // Lingkaran luar kuning
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#facc15';
+            ctx.beginPath();
+            ctx.arc(0, 0, heliR, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Lingkaran dalam putih tipis
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(0, 0, heliR * 0.78, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Huruf "H" Putih Tebal di tengah Helipad
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.round(heliR * 1.05)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('H', 0, 1);
+
+            // Ruang Mesin Lift & Tangga Darurat (Elevator Penthouse)
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(-w * 0.42, -d * 0.42, w * 0.26, d * 0.24);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(-w * 0.42, -d * 0.42, w * 0.26, d * 0.24);
+
+            // Unit Pendingin HVAC / AC Chiller dengan Kipas
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(w * 0.18, -d * 0.4, w * 0.24, d * 0.2);
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(w * 0.3, -d * 0.3, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Tiang Antena Komunikasi dengan Lampu Merah Berkedip
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(w * 0.35, d * 0.3);
+            ctx.lineTo(w * 0.35, d * 0.3 - 24);
+            ctx.stroke();
+
+            // Lampu strobo merah penanda pesawat
+            const isBlinkOn = (Math.floor(Date.now() / 450) % 2 === 0);
+            ctx.fillStyle = isBlinkOn ? '#ef4444' : '#7f1d1d';
+            ctx.beginPath();
+            ctx.arc(w * 0.35, d * 0.3 - 25, isBlinkOn ? 4.5 : 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            if (isBlinkOn) {
+              ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+              ctx.beginPath();
+              ctx.arc(w * 0.35, d * 0.3 - 25, 9, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            break;
+          }
+
+          // ==========================================
+          // 2. GEDUNG KANTOR MODERN (OFFICE BUILDING)
+          // ==========================================
+          case 'officeBuilding': {
+            // Bayangan jatuh
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.beginPath();
+            ctx.ellipse(22, 28, w * 0.62, d * 0.52, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Dinding Facade Beton & Kaca (2.5D Depth)
+            const wallGrad = ctx.createLinearGradient(0, -d / 2, 0, d / 2 + h);
+            wallGrad.addColorStop(0, '#475569');
+            wallGrad.addColorStop(1, '#1e293b');
+            ctx.fillStyle = wallGrad;
+            ctx.beginPath();
+            ctx.roundRect(-w / 2, -d / 2 + h, w, d, 4);
+            ctx.fill();
+
+            // Jendela Pita Kaca (Ribbon Windows)
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
+            const winCols = 5;
+            const winRows = 3;
+            const wColW = (w - 18) / winCols;
+            const wRowH = (d - 16) / winRows;
+            for (let c = 0; c < winCols; c++) {
+              for (let rIdx = 0; rIdx < winRows; rIdx++) {
+                ctx.fillRect(-w / 2 + 10 + c * wColW, -d / 2 + h + 8 + rIdx * wRowH, wColW * 0.75, wRowH * 0.65);
+              }
+            }
+
+            // Pintu Kaca Lobby Depan
+            ctx.fillStyle = 'rgba(254, 240, 138, 0.9)';
+            ctx.fillRect(-w * 0.18, d / 2 + h - 12, w * 0.36, 12);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-1, d / 2 + h - 12, 2, 12);
+
+            // Permukaan Atap Kerikil Abu-Abu (Gravel Roof)
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.roundRect(-w / 2, -d / 2, w, d, 4);
+            ctx.fill();
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(-w / 2 + 2, -d / 2 + 2, w - 4, d - 4);
+
+            // Tangki Air Kayu Tradisional di Atap (Water Tower on Stilts)
+            ctx.fillStyle = '#78350f';
+            ctx.beginPath();
+            ctx.arc(-w * 0.25, -d * 0.22, 13, 0, Math.PI * 2);
+            ctx.fill();
+            // Sabuk besi tangki
+            ctx.strokeStyle = '#451a03';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // Kerucut atap tangki
+            ctx.fillStyle = '#b45309';
+            ctx.beginPath();
+            ctx.arc(-w * 0.25, -d * 0.22, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Panel Surya di Atap (Solar Panels)
+            ctx.fillStyle = '#1e3a8a';
+            const panelW = 20;
+            const panelH = 14;
+            for (let px = 4; px < w * 0.42; px += panelW + 4) {
+              ctx.fillRect(px, -d * 0.28, panelW, panelH);
+              ctx.strokeStyle = '#93c5fd';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(px, -d * 0.28, panelW, panelH);
+            }
+
+            // Unit Ventilasi AC Besar
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(-w * 0.2, d * 0.15, w * 0.4, d * 0.2);
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(-w * 0.16, d * 0.18, w * 0.32, d * 0.14);
+            break;
+          }
+
+          // ==========================================
+          // 3. RUMAH TINGGAL SUBURB REALISTIS (SMALL HOUSE)
+          // ==========================================
+          case 'smallHouse': {
+            // Halaman Rumput Hijau & Jalur Semen Rumah
+            ctx.fillStyle = '#15803d';
+            ctx.beginPath();
+            ctx.roundRect(-w / 2 - 8, -d / 2 - 8, w + 16, d + 22, 8);
+            ctx.fill();
+
+            // Jalan Masuk Mobil / Paving Semen (Driveway)
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(w * 0.22, d * 0.1, w * 0.28, d * 0.48);
+
+            // Jalan Setapak ke Pintu Depan (Walkway)
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(-8, d * 0.2, 16, d * 0.38);
+
+            // Bayangan Atap Rumah
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(14, 18, w * 0.55, d * 0.48, 0.15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Dinding Rumah Tampak Bawah (2.5D Front Wall)
+            ctx.fillStyle = '#fed7aa';
+            ctx.fillRect(-w / 2, -d / 2 + h, w, d);
+
+            // Pintu Depan dengan Kanopi
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(-9, d / 2 + h - 14, 18, 14);
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(4, d / 2 + h - 7, 2, 2); // Gagang pintu
+
+            // Jendela Depan dengan Kusen & Tirai
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(-w * 0.38, d / 2 + h - 12, 16, 10);
+            ctx.fillRect(w * 0.22, d / 2 + h - 12, 16, 10);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(-w * 0.38, d / 2 + h - 12, 16, 10);
+            ctx.strokeRect(w * 0.22, d / 2 + h - 12, 16, 10);
+
+            // Atap Genteng Bersusun / Hip Roof (Terracotta Tiles)
+            const roofColors = ['#b45309', '#9a3412', '#475569', '#0369a1'];
+            const chosenRoof = roofColors[this.styleSeed % roofColors.length];
+            ctx.fillStyle = chosenRoof;
+            ctx.beginPath();
+            ctx.roundRect(-w / 2, -d / 2, w, d, 4);
+            ctx.fill();
+
+            // Garis Nok Genteng Tengah (Roof Ridge Line)
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-w * 0.35, 0);
+            ctx.lineTo(w * 0.35, 0);
+            ctx.stroke();
+
+            // Tekstur Garis Genteng Miring
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-w * 0.35, 0);
+            ctx.lineTo(-w / 2, -d / 2);
+            ctx.moveTo(-w * 0.35, 0);
+            ctx.lineTo(-w / 2, d / 2);
+            ctx.moveTo(w * 0.35, 0);
+            ctx.lineTo(w / 2, -d / 2);
+            ctx.moveTo(w * 0.35, 0);
+            ctx.lineTo(w / 2, d / 2);
+            ctx.stroke();
+
+            // Cerobong Asap Bata Merah (Brick Chimney)
+            ctx.fillStyle = '#7f1d1d';
+            ctx.fillRect(w * 0.22, -d * 0.35, 14, 14);
+            ctx.fillStyle = '#450a0a';
+            ctx.fillRect(w * 0.22 + 2, -d * 0.35 + 2, 10, 10);
+            break;
+          }
+
+          // ==========================================
+          // 4. KAFE & KIOS JALANAN (KIOSK / SHOP)
+          // ==========================================
+          case 'kiosk': {
+            // Bayangan dasar
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+            ctx.beginPath();
+            ctx.ellipse(8, 14, w * 0.55, d * 0.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Badan Toko / Ruko
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(-w / 2, -d / 2 + h, w, d);
+
+            // Kaca Etalase Toko Bercahaya
+            ctx.fillStyle = 'rgba(254, 240, 138, 0.85)';
+            ctx.fillRect(-w * 0.42, d / 2 + h - 16, w * 0.84, 16);
+
+            // Kanopi Garis-Garis Kafe (Striped Awning)
+            const awningCols = 6;
+            const awW = w / awningCols;
+            for (let i = 0; i < awningCols; i++) {
+              ctx.fillStyle = (i % 2 === 0) ? '#ef4444' : '#ffffff';
+              ctx.fillRect(-w / 2 + i * awW, d / 2, awW, 14);
+            }
+
+            // Atap Toko & Papan Nama
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(-w / 2, -d / 2, w, d);
+
+            // Papan Nama Kafe / Minimart di Atap
+            ctx.fillStyle = '#0284c7';
+            ctx.fillRect(-w * 0.36, -d * 0.3, w * 0.72, 16);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.styleSeed % 2 === 0 ? 'CAFE' : 'MART', 0, -d * 0.3 + 8);
+            break;
+          }
+
+          // ==========================================
+          // 5. KENDARAAN REALISTIS (MOBIL, TAKSI, POLISI, BUS)
+          // ==========================================
           case 'sedanCar':
           case 'taxiCar':
-            // Bodi mobil persegi panjang membulat
-            ctx.fillStyle = this.color;
+          case 'policeCar': {
+            // Bayangan bawah mobil
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.beginPath();
+            ctx.roundRect(-r * 0.85 + 3, -r * 1.35 + 3, r * 1.7, r * 2.7, 8);
+            ctx.fill();
+
+            // Roda / Ban Mobil (4 Roda samping)
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(-r * 0.95, -r * 1.0, 4, 12);
+            ctx.fillRect(r * 0.95 - 4, -r * 1.0, 4, 12);
+            ctx.fillRect(-r * 0.95, r * 0.6, 4, 12);
+            ctx.fillRect(r * 0.95 - 4, r * 0.6, 4, 12);
+
+            // Bodi Mobil (Aerodynamic curved chassis)
+            const carBodyGrad = ctx.createLinearGradient(-r * 0.8, 0, r * 0.8, 0);
+            carBodyGrad.addColorStop(0, this.color);
+            carBodyGrad.addColorStop(0.5, this.accentColor);
+            carBodyGrad.addColorStop(1, this.color);
+            ctx.fillStyle = (this.typeKey === 'taxiCar') ? '#eab308' : (this.typeKey === 'policeCar' ? '#0f172a' : carBodyGrad);
             ctx.beginPath();
             ctx.roundRect(-r * 0.8, -r * 1.3, r * 1.6, r * 2.6, 8);
             ctx.fill();
 
-            // Kaca depan & belakang
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-            ctx.fillRect(-r * 0.6, -r * 0.7, r * 1.2, r * 0.4);
-            ctx.fillRect(-r * 0.6, r * 0.5, r * 1.2, r * 0.35);
-
-            // Atap mobil
-            ctx.fillStyle = this.accentColor;
-            ctx.fillRect(-r * 0.55, -r * 0.25, r * 1.1, r * 0.7);
-
-            // Lampu depan (Headlights)
-            ctx.fillStyle = '#fef08a';
-            ctx.fillRect(-r * 0.7, -r * 1.3, r * 0.3, r * 0.15);
-            ctx.fillRect(r * 0.4, -r * 1.3, r * 0.3, r * 0.15);
-            break;
-
-          case 'cityBus':
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.roundRect(-r * 0.75, -r * 1.6, r * 1.5, r * 3.2, 10);
-            ctx.fill();
-            ctx.fillStyle = this.accentColor;
-            ctx.fillRect(-r * 0.55, -r * 1.3, r * 1.1, r * 2.6);
-            break;
-
-          case 'kiosk':
-          case 'smallHouse':
-            // Dinding
-            ctx.fillStyle = this.color;
-            ctx.fillRect(-r, -r * 0.9, r * 2, r * 1.8);
-            // Atap miring kontras
-            ctx.fillStyle = this.accentColor;
-            ctx.beginPath();
-            ctx.moveTo(-r * 1.1, 0);
-            ctx.lineTo(0, -r * 1.2);
-            ctx.lineTo(r * 1.1, 0);
-            ctx.lineTo(0, r * 1.2);
-            ctx.closePath();
-            ctx.fill();
-            break;
-
-          case 'officeBuilding':
-          case 'skyscraper':
-            // Bodi gedung bertingkat
-            ctx.fillStyle = this.color;
-            ctx.fillRect(-r, -r, r * 2, r * 2);
-
-            // Jendela-jendela bercahaya (Grid windows)
-            ctx.fillStyle = this.accentColor;
-            const step = r * 0.45;
-            for (let wx = -r + 8; wx < r - 8; wx += step) {
-              for (let wy = -r + 8; wy < r - 8; wy += step) {
-                ctx.fillRect(wx, wy, step * 0.6, step * 0.5);
-              }
+            // Pintu & Kap Polisi jika Mobil Patroli
+            if (this.typeKey === 'policeCar') {
+              ctx.fillStyle = '#f8fafc';
+              ctx.fillRect(-r * 0.8, -r * 0.4, r * 1.6, r * 0.9);
             }
 
-            // Helipad / Rooftop AC di atap gedung
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(-r * 0.5, -r * 0.5, r, r);
+            // Kaca Depan (Windshield dengan refleksi sinar)
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.roundRect(-r * 0.65, -r * 0.75, r * 1.3, r * 0.45, 4);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+            ctx.fillRect(-r * 0.55, -r * 0.7, r * 0.4, r * 0.35);
+
+            // Kaca Belakang
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.roundRect(-r * 0.65, r * 0.5, r * 1.3, r * 0.38, 4);
+            ctx.fill();
+
+            // Atap Mobil (Car Roof)
+            ctx.fillStyle = (this.typeKey === 'policeCar') ? '#f8fafc' : (this.typeKey === 'taxiCar' ? '#facc15' : this.color);
+            ctx.fillRect(-r * 0.55, -r * 0.25, r * 1.1, r * 0.7);
+
+            // Lampu Depan (Headlights)
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(-r * 0.7, -r * 1.35, 7, 4);
+            ctx.fillRect(r * 0.7 - 7, -r * 1.35, 7, 4);
+
+            // Lampu Belakang Merah (Brake lights)
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(-r * 0.7, r * 1.25, 7, 4);
+            ctx.fillRect(r * 0.7 - 7, r * 1.25, 7, 4);
+
+            // Mahkota Taksi (Taxi Sign)
+            if (this.typeKey === 'taxiCar') {
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(-7, -4, 14, 8);
+              ctx.fillStyle = '#0f172a';
+              ctx.font = 'bold 6px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('TAXI', 0, 0);
+            }
+
+            // Strobo Polisi Berkedip (Police Lightbar)
+            if (this.typeKey === 'policeCar') {
+              const policeBlink = Math.floor(Date.now() / 150) % 2 === 0;
+              ctx.fillStyle = policeBlink ? '#ef4444' : '#2563eb';
+              ctx.fillRect(-9, -4, 9, 8);
+              ctx.fillStyle = policeBlink ? '#2563eb' : '#ef4444';
+              ctx.fillRect(0, -4, 9, 8);
+            }
             break;
+          }
+
+          case 'cityBus': {
+            // Bayangan bus panjang
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+            ctx.beginPath();
+            ctx.roundRect(-r * 0.8 + 4, -r * 1.7 + 4, r * 1.6, r * 3.4, 10);
+            ctx.fill();
+
+            // Roda Bus
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-r * 0.88, -r * 1.2, 5, 14);
+            ctx.fillRect(r * 0.88 - 5, -r * 1.2, 5, 14);
+            ctx.fillRect(-r * 0.88, r * 0.8, 5, 14);
+            ctx.fillRect(r * 0.88 - 5, r * 0.8, 5, 14);
+
+            // Bodi Utama Bus
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.roundRect(-r * 0.8, -r * 1.65, r * 1.6, r * 3.3, 10);
+            ctx.fill();
+
+            // Atap Bus Putih Bersih
+            ctx.fillStyle = '#f8fafc';
+            ctx.beginPath();
+            ctx.roundRect(-r * 0.65, -r * 1.45, r * 1.3, r * 2.9, 8);
+            ctx.fill();
+
+            // Kaca Depan Panorama Luas
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-r * 0.65, -r * 1.6, r * 1.3, 10);
+            ctx.fillStyle = '#facc15';
+            ctx.fillRect(-10, -r * 1.65, 20, 4); // Display Rute
+
+            // Kipas Ventilasi Atap Bus
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath();
+            ctx.arc(0, -r * 0.6, 6, 0, Math.PI * 2);
+            ctx.arc(0, r * 0.5, 6, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          }
+
+          case 'motorcycle': {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.ellipse(2, 2, r * 0.6, r * 1.1, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Ban depan & belakang
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-3, -r * 0.9, 6, 10);
+            ctx.fillRect(-3, r * 0.3, 6, 10);
+
+            // Rangka Bodi Sport
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.roundRect(-5, -r * 0.5, 10, r * 0.9, 4);
+            ctx.fill();
+
+            // Stang motor
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(-10, -r * 0.4);
+            ctx.lineTo(10, -r * 0.4);
+            ctx.stroke();
+
+            // Lampu depan
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(0, -r * 0.7, 3, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          }
+
+          // ==========================================
+          // 6. PERLENGKAPAN JALAN & TROTOAR (STREET PROPS)
+          // ==========================================
+          case 'hydrant': {
+            // Bayangan
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.beginPath();
+            ctx.arc(3, 4, r * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Badan Silinder Hidran Merah Cast Iron
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nozel Samping (Discharge Nozzles)
+            ctx.fillStyle = '#991b1b';
+            ctx.fillRect(-r * 1.25, -3, r * 2.5, 6);
+
+            // Tutup Kubah Atas
+            ctx.fillStyle = '#f87171';
+            ctx.beginPath();
+            ctx.arc(0, -1, r * 0.55, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Baut Segilima Pengunci
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(0, -1, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          }
+
+          case 'trashCan': {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.fillRect(-r + 2, -r + 3, r * 2, r * 2);
+
+            // Kotak Sampah Daur Ulang Stainless/Hijau
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.roundRect(-r, -r, r * 2, r * 2, 4);
+            ctx.fill();
+
+            // Tutup dengan Lubang Masuk
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(-r * 0.8, -r * 0.8, r * 1.6, r * 0.5);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-r * 0.5, -r * 0.65, r, 3);
+            break;
+          }
+
+          case 'streetLamp': {
+            // Pijar Cahaya Lampu Hangat di Trotoar
+            const lightGlow = ctx.createRadialGradient(0, -r * 0.8, 4, 0, -r * 0.8, r * 2.2);
+            lightGlow.addColorStop(0, 'rgba(254, 240, 138, 0.35)');
+            lightGlow.addColorStop(0.6, 'rgba(254, 240, 138, 0.12)');
+            lightGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = lightGlow;
+            ctx.beginPath();
+            ctx.arc(0, -r * 0.8, r * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Bayangan tiang
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.fillRect(2, -r * 0.8, 3, r * 1.6);
+
+            // Tiang Baja Lampu Jalan
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Lengan Lampu Melengkung
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -r * 0.8);
+            ctx.stroke();
+
+            // Kap Lampu LED Kuning Bercahaya
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(0, -r * 0.8, r * 0.55, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          }
+
+          case 'smallTree': {
+            // Bayangan Dedaunan Pohon
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.beginPath();
+            ctx.ellipse(r * 0.25, r * 0.3, r * 0.95, r * 0.8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Batang Kayu Cokelat
+            ctx.fillStyle = '#78350f';
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Lapisan Dedaunan Pohon (Layered Foliage)
+            // Layer gelap dasar
+            ctx.fillStyle = '#15803d';
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Layer daun sedang
+            ctx.fillStyle = '#16a34a';
+            ctx.beginPath();
+            ctx.arc(-r * 0.18, -r * 0.15, r * 0.72, 0, Math.PI * 2);
+            ctx.arc(r * 0.2, -r * 0.1, r * 0.65, 0, Math.PI * 2);
+            ctx.arc(0, r * 0.25, r * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Sorot cahaya daun (Highlight)
+            ctx.fillStyle = '#4ade80';
+            ctx.beginPath();
+            ctx.arc(-r * 0.25, -r * 0.3, r * 0.42, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          }
 
           default:
             ctx.fillStyle = this.color;
@@ -1458,38 +1985,276 @@
         this.canvas.height = window.innerHeight;
       }
 
-      // Mengisi kota dengan jalan raya, blok bangunan, dan objek berukuran variatif
+      // Mengisi kota dengan tata letak beraturan (Grid-based Urban Zoning & Road Networks)
+      // Memastikan bangunan hanya di dalam blok kavling dan TIDAK PERNAH muncul di tengah jalan
       populateCity() {
         this.objects = [];
 
-        // Helper acak posisi dengan margin
-        const getRandPos = () => ({
-          x: 100 + Math.random() * (CONFIG.WORLD_WIDTH - 200),
-          y: 100 + Math.random() * (CONFIG.WORLD_HEIGHT - 200)
-        });
+        const blockSize = CONFIG.BLOCK_SIZE; // 600
+        const roadWidth = CONFIG.ROAD_WIDTH; // 110
+        const sidewalkWidth = CONFIG.SIDEWALK_WIDTH; // 32
+        const cols = Math.floor(CONFIG.WORLD_WIDTH / blockSize); // 6
+        const rows = Math.floor(CONFIG.WORLD_HEIGHT / blockSize); // 6
 
-        // 1. Spawn Objek Kecil
-        const smallTypes = ['hydrant', 'trashCan', 'streetLamp', 'smallTree'];
-        for (let i = 0; i < CONFIG.SPAWN_COUNTS.SMALL; i++) {
-          const pos = getRandPos();
+        // -------------------------------------------------------------
+        // 1. KAVLING TATA KOTA & DISTRIK BANGUNAN (ZONING BERATURAN)
+        // -------------------------------------------------------------
+        for (let bx = 0; bx < cols; bx++) {
+          for (let by = 0; by < rows; by++) {
+            // Batas luar blok fisik
+            const blockLeft = bx * blockSize + roadWidth / 2;
+            const blockRight = (bx + 1) * blockSize - roadWidth / 2;
+            const blockTop = by * blockSize + roadWidth / 2;
+            const blockBottom = (by + 1) * blockSize - roadWidth / 2;
+
+            // Batas zona kavling dalam (aman dari trotoar dan jalan)
+            const innerLeft = blockLeft + sidewalkWidth + 10;
+            const innerRight = blockRight - sidewalkWidth - 10;
+            const innerTop = blockTop + sidewalkWidth + 10;
+            const innerBottom = blockBottom - sidewalkWidth - 10;
+            const centerX = (innerLeft + innerRight) / 2;
+            const centerY = (innerTop + innerBottom) / 2;
+
+            // Identifikasi Zona Distrik Kota:
+            const isParkBlock = (bx === 1 && by === 1) || (bx === 4 && by === 4);
+            const isDowntown = (bx === 2 || bx === 3) && (by === 2 || by === 3);
+            const isCommercial = !isParkBlock && !isDowntown && (bx >= 1 && bx <= 4 && by >= 1 && by <= 4);
+
+            if (isParkBlock) {
+              // --- ZONA TAMAN KOTA ASRI (CITY PARK OASIS) ---
+              // Kios minuman & es krim di taman
+              this.objects.push(new CityObject(centerX - 45, centerY - 40, 'kiosk', 0));
+              this.objects.push(new CityObject(centerX + 65, centerY + 50, 'kiosk', Math.PI));
+
+              // Pepohonan rindang di sekitar taman
+              const treeOffsets = [
+                [-120, -110], [-60, -130], [50, -120], [120, -100],
+                [-130, 0], [130, 10], [-120, 110], [-40, 120],
+                [60, 120], [120, 100], [0, -70], [0, 70]
+              ];
+              treeOffsets.forEach(([ox, oy]) => {
+                this.objects.push(new CityObject(centerX + ox, centerY + oy, 'smallTree'));
+              });
+
+              // Fasilitas taman: tempat sampah & lampu hias taman
+              this.objects.push(new CityObject(centerX - 20, centerY - 60, 'trashCan'));
+              this.objects.push(new CityObject(centerX + 85, centerY + 30, 'trashCan'));
+              this.objects.push(new CityObject(centerX - 80, centerY - 80, 'streetLamp'));
+              this.objects.push(new CityObject(centerX + 80, centerY + 80, 'streetLamp'));
+
+            } else if (isDowntown) {
+              // --- ZONA PUSAT KOTA & PENCAKAR LANGIT (DOWNTOWN METROPOLIS) ---
+              // Gedung pencakar langit megah di poros tengah blok
+              this.objects.push(new CityObject(centerX, centerY, 'skyscraper', 0));
+
+              // Plaza modern di sekeliling pencakar langit
+              // Pohon hias di 4 sudut plaza
+              this.objects.push(new CityObject(innerLeft + 45, innerTop + 45, 'smallTree'));
+              this.objects.push(new CityObject(innerRight - 45, innerTop + 45, 'smallTree'));
+              this.objects.push(new CityObject(innerLeft + 45, innerBottom - 45, 'smallTree'));
+              this.objects.push(new CityObject(innerRight - 45, innerBottom - 45, 'smallTree'));
+
+              // Kios cafe modern / kedai kopi eksekutif
+              this.objects.push(new CityObject(innerLeft + 40, centerY, 'kiosk', Math.PI / 2));
+              this.objects.push(new CityObject(innerRight - 40, centerY, -Math.PI / 2));
+
+              // Mobil eksekutif parkir di drop-off lobby
+              this.objects.push(new CityObject(centerX - 60, innerBottom - 40, 'sedanCar', 0));
+              this.objects.push(new CityObject(centerX + 60, innerBottom - 40, 'taxiCar', 0));
+
+              // Tempat sampah & hidran plaza
+              this.objects.push(new CityObject(innerLeft + 65, innerBottom - 25, 'trashCan'));
+              this.objects.push(new CityObject(innerRight - 65, innerBottom - 25, 'hydrant'));
+
+            } else if (isCommercial) {
+              // --- ZONA PERKANTORAN & PERTOKOAN (COMMERCIAL DISTRICT) ---
+              // 2 Gedung perkantoran teratur berjajar rapi
+              this.objects.push(new CityObject(centerX, innerTop + 90, 'officeBuilding', 0));
+              this.objects.push(new CityObject(centerX, innerBottom - 90, 'officeBuilding', 0));
+
+              // Kios / Minimarket di sisi samping
+              this.objects.push(new CityObject(innerLeft + 45, centerY, 'kiosk', Math.PI / 2));
+
+              // Area parkir kantor dengan mobil terparkir rapi
+              this.objects.push(new CityObject(innerRight - 50, centerY - 35, 'sedanCar', 0));
+              this.objects.push(new CityObject(innerRight - 50, centerY + 35, 'motorcycle', 0));
+
+              // Pohon peneduh kantor
+              this.objects.push(new CityObject(innerLeft + 40, innerTop + 40, 'smallTree'));
+              this.objects.push(new CityObject(innerRight - 40, innerTop + 40, 'smallTree'));
+              this.objects.push(new CityObject(innerLeft + 40, innerBottom - 40, 'smallTree'));
+
+              // Tong sampah kantor
+              this.objects.push(new CityObject(innerLeft + 55, centerY + 30, 'trashCan'));
+
+            } else {
+              // --- ZONA PERUMAHAN SUBURBAN TERTATA (RESIDENTIAL QUARTERS) ---
+              // Dibagi rapi menjadi 4 kavling rumah hunian (NW, NE, SW, SE)
+              const housePlots = [
+                { x: innerLeft + 95, y: innerTop + 85, carX: innerLeft + 40, carY: innerTop + 125, treeX: innerLeft + 155, treeY: innerTop + 125, carType: 'sedanCar' },
+                { x: innerRight - 95, y: innerTop + 85, carX: innerRight - 40, carY: innerTop + 125, treeX: innerRight - 155, treeY: innerTop + 125, carType: 'taxiCar' },
+                { x: innerLeft + 95, y: innerBottom - 85, carX: innerLeft + 40, carY: innerBottom - 125, treeX: innerLeft + 155, treeY: innerBottom - 125, carType: 'motorcycle' },
+                { x: innerRight - 95, y: innerBottom - 85, carX: innerRight - 40, carY: innerBottom - 125, treeX: innerRight - 155, treeY: innerBottom - 125, carType: 'sedanCar' }
+              ];
+
+              housePlots.forEach(plot => {
+                // Rumah tinggal menghadap jalan
+                this.objects.push(new CityObject(plot.x, plot.y, 'smallHouse', 0));
+                // Kendaraan di carport pribadi rumah
+                this.objects.push(new CityObject(plot.carX, plot.carY, plot.carType, 0));
+                // Pohon halaman rumah
+                this.objects.push(new CityObject(plot.treeX, plot.treeY, 'smallTree'));
+                // Tong sampah pribadi di pagar depan
+                this.objects.push(new CityObject(plot.carX, plot.carY > centerY ? plot.carY + 30 : plot.carY - 30, 'trashCan'));
+              });
+            }
+
+            // -----------------------------------------------------------
+            // 2. INFRASTRUKTUR TROTOAR (LAMPU, HIDRAN, TONG SAMPAH, POHON)
+            // Diposisikan persis di atas trotoar tepi jalan (bukan di aspal)
+            // -----------------------------------------------------------
+            const swMidYTop = blockTop + sidewalkWidth / 2;
+            const swMidYBottom = blockBottom - sidewalkWidth / 2;
+            const swMidXLeft = blockLeft + sidewalkWidth / 2;
+            const swMidXRight = blockRight - sidewalkWidth / 2;
+
+            // Lampu jalan di sepanjang trotoar
+            this.objects.push(new CityObject(blockLeft + 90, swMidYTop, 'streetLamp'));
+            this.objects.push(new CityObject(blockRight - 90, swMidYTop, 'streetLamp'));
+            this.objects.push(new CityObject(blockLeft + 90, swMidYBottom, 'streetLamp'));
+            this.objects.push(new CityObject(blockRight - 90, swMidYBottom, 'streetLamp'));
+            this.objects.push(new CityObject(swMidXLeft, blockTop + 180, 'streetLamp'));
+            this.objects.push(new CityObject(swMidXRight, blockTop + 180, 'streetLamp'));
+
+            // Pohon peneduh trotoar (di dalam pot trotoar kota)
+            this.objects.push(new CityObject(centerX, swMidYTop, 'smallTree'));
+            this.objects.push(new CityObject(centerX, swMidYBottom, 'smallTree'));
+
+            // Hidran kebakaran di sudut trotoar dekat persimpangan
+            this.objects.push(new CityObject(blockLeft + 25, blockTop + 25, 'hydrant'));
+            this.objects.push(new CityObject(blockRight - 25, blockBottom - 25, 'hydrant'));
+
+            // Tong sampah publik
+            this.objects.push(new CityObject(swMidXLeft, blockBottom - 80, 'trashCan'));
+            this.objects.push(new CityObject(swMidXRight, blockTop + 80, 'trashCan'));
+          }
+        }
+
+        // -------------------------------------------------------------
+        // 3. KENDARAAN LALU LINTAS JALAN RAYA (TERTIB DI LAJUR ASPAL)
+        // -------------------------------------------------------------
+        const vehicleTypes = ['sedanCar', 'taxiCar', 'policeCar', 'cityBus', 'motorcycle'];
+        const laneOffset = 26; // Jarak dari garis tengah jalan ke tengah lajur
+
+        // A. Jalan Horizontal (Timur - Barat)
+        for (let r = 1; r < rows; r++) {
+          const roadY = r * blockSize;
+
+          // Lajur ke Timur (Arah Kanan, Y + laneOffset, rotasi 0)
+          for (let k = 0; k < 4; k++) {
+            const spawnX = (k * 900 + 150 + Math.random() * 200) % CONFIG.WORLD_WIDTH;
+            const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+            const spd = 1.4 + Math.random() * 1.2;
+            this.objects.push(new CityObject(spawnX, roadY + laneOffset, type, 0, true, spd, 0));
+          }
+
+          // Lajur ke Barat (Arah Kiri, Y - laneOffset, rotasi PI)
+          for (let k = 0; k < 4; k++) {
+            const spawnX = (k * 900 + 450 + Math.random() * 200) % CONFIG.WORLD_WIDTH;
+            const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+            const spd = -(1.4 + Math.random() * 1.2);
+            this.objects.push(new CityObject(spawnX, roadY - laneOffset, type, Math.PI, true, spd, 0));
+          }
+        }
+
+        // B. Jalan Vertikal (Utara - Selatan)
+        for (let c = 1; c < cols; c++) {
+          const roadX = c * blockSize;
+
+          // Lajur ke Selatan (Arah Bawah, X + laneOffset, rotasi PI/2)
+          for (let k = 0; k < 4; k++) {
+            const spawnY = (k * 900 + 200 + Math.random() * 200) % CONFIG.WORLD_HEIGHT;
+            const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+            const spd = 1.4 + Math.random() * 1.2;
+            this.objects.push(new CityObject(roadX + laneOffset, spawnY, type, Math.PI / 2, true, 0, spd));
+          }
+
+          // Lajur ke Utara (Arah Atas, X - laneOffset, rotasi -PI/2)
+          for (let k = 0; k < 4; k++) {
+            const spawnY = (k * 900 + 600 + Math.random() * 200) % CONFIG.WORLD_HEIGHT;
+            const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+            const spd = -(1.4 + Math.random() * 1.2);
+            this.objects.push(new CityObject(roadX - laneOffset, spawnY, type, -Math.PI / 2, true, 0, spd));
+          }
+        }
+      }
+
+      // Respawn objek secara teratur pada lokasi aman saat jumlah objek berkurang
+      spawnSafeObject() {
+        const blockSize = CONFIG.BLOCK_SIZE;
+        const roadWidth = CONFIG.ROAD_WIDTH;
+        const sidewalkWidth = CONFIG.SIDEWALK_WIDTH;
+        const cols = Math.floor(CONFIG.WORLD_WIDTH / blockSize);
+        const rows = Math.floor(CONFIG.WORLD_HEIGHT / blockSize);
+
+        const isVehicle = Math.random() < 0.35;
+
+        if (isVehicle) {
+          const isHorizontal = Math.random() < 0.5;
+          const vehicleTypes = ['sedanCar', 'taxiCar', 'policeCar', 'cityBus', 'motorcycle'];
+          const type = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+          const laneOffset = 26;
+
+          if (isHorizontal) {
+            const r = 1 + Math.floor(Math.random() * (rows - 1));
+            const roadY = r * blockSize;
+            const goEast = Math.random() < 0.5;
+            const spd = 1.4 + Math.random() * 1.2;
+            const laneY = goEast ? roadY + laneOffset : roadY - laneOffset;
+            const rot = goEast ? 0 : Math.PI;
+            const vx = goEast ? spd : -spd;
+            const startX = goEast ? 10 : CONFIG.WORLD_WIDTH - 10;
+            this.objects.push(new CityObject(startX, laneY, type, rot, true, vx, 0));
+          } else {
+            const c = 1 + Math.floor(Math.random() * (cols - 1));
+            const roadX = c * blockSize;
+            const goSouth = Math.random() < 0.5;
+            const spd = 1.4 + Math.random() * 1.2;
+            const laneX = goSouth ? roadX + laneOffset : roadX - laneOffset;
+            const rot = goSouth ? Math.PI / 2 : -Math.PI / 2;
+            const vy = goSouth ? spd : -spd;
+            const startY = goSouth ? 10 : CONFIG.WORLD_HEIGHT - 10;
+            this.objects.push(new CityObject(laneX, startY, type, rot, true, 0, vy));
+          }
+        } else {
+          // Prop kecil di trotoar atau taman
+          const bx = Math.floor(Math.random() * cols);
+          const by = Math.floor(Math.random() * rows);
+          const smallTypes = ['hydrant', 'trashCan', 'streetLamp', 'smallTree'];
           const type = smallTypes[Math.floor(Math.random() * smallTypes.length)];
-          this.objects.push(new CityObject(pos.x, pos.y, type));
-        }
 
-        // 2. Spawn Objek Sedang
-        const medTypes = ['motorcycle', 'sedanCar', 'taxiCar', 'kiosk', 'cityBus'];
-        for (let i = 0; i < CONFIG.SPAWN_COUNTS.MEDIUM; i++) {
-          const pos = getRandPos();
-          const type = medTypes[Math.floor(Math.random() * medTypes.length)];
-          this.objects.push(new CityObject(pos.x, pos.y, type));
-        }
+          const blockLeft = bx * blockSize + roadWidth / 2;
+          const blockRight = (bx + 1) * blockSize - roadWidth / 2;
+          const blockTop = by * blockSize + roadWidth / 2;
+          const blockBottom = (by + 1) * blockSize - roadWidth / 2;
 
-        // 3. Spawn Objek Besar
-        const largeTypes = ['smallHouse', 'officeBuilding', 'skyscraper'];
-        for (let i = 0; i < CONFIG.SPAWN_COUNTS.LARGE; i++) {
-          const pos = getRandPos();
-          const type = largeTypes[Math.floor(Math.random() * largeTypes.length)];
-          this.objects.push(new CityObject(pos.x, pos.y, type));
+          const side = Math.floor(Math.random() * 4);
+          let px, py;
+          if (side === 0) {
+            px = blockLeft + 40 + Math.random() * (blockRight - blockLeft - 80);
+            py = blockTop + sidewalkWidth / 2;
+          } else if (side === 1) {
+            px = blockLeft + 40 + Math.random() * (blockRight - blockLeft - 80);
+            py = blockBottom - sidewalkWidth / 2;
+          } else if (side === 2) {
+            px = blockLeft + sidewalkWidth / 2;
+            py = blockTop + 40 + Math.random() * (blockBottom - blockTop - 80);
+          } else {
+            px = blockRight - sidewalkWidth / 2;
+            py = blockTop + 40 + Math.random() * (blockBottom - blockTop - 80);
+          }
+
+          this.objects.push(new CityObject(px, py, type));
         }
       }
 
@@ -1629,15 +2394,10 @@
         // Hapus objek yang sudah selesai ditelan
         this.objects = this.objects.filter(obj => obj.alive);
 
-        // Jika objek kota mulai menipis, spawn kembali secara bertahap agar map selalu hidup
-        if (this.objects.length < 80) {
-          const smallTypes = ['hydrant', 'trashCan', 'streetLamp', 'smallTree'];
-          for (let i = 0; i < 20; i++) {
-            this.objects.push(new CityObject(
-              100 + Math.random() * (CONFIG.WORLD_WIDTH - 200),
-              100 + Math.random() * (CONFIG.WORLD_HEIGHT - 200),
-              smallTypes[Math.floor(Math.random() * smallTypes.length)]
-            ));
+        // Jika objek kota mulai menipis, spawn kembali secara teratur pada zona aman
+        if (this.objects.length < 90) {
+          for (let i = 0; i < 15; i++) {
+            this.spawnSafeObject();
           }
         }
       }
@@ -1705,6 +2465,15 @@
         // 1. UPDATE STATE
         if (this.state === 'PLAYING') {
           this.player.update();
+
+          // Update pergerakan lalu lintas kendaraan di jalan raya
+          for (let i = 0; i < this.objects.length; i++) {
+            const obj = this.objects[i];
+            if (obj.isMoving && !obj.isBeingEaten) {
+              obj.update(dt, this.player.x, this.player.y);
+            }
+          }
+
           this.checkCollisions();
 
           // Update Kombo Decay
@@ -1794,51 +2563,226 @@
         ctx.restore();
       }
 
-      // Render Pola Jalan Raya, Trotoar, Zebra Cross, dan Blok Kota
+      // Render Pola Jalan Raya, Trotoar, Zebra Cross, dan Blok Kota Beraturan
       renderCityGround(ctx) {
-        // Warna aspal gelap dasar
-        ctx.fillStyle = '#0f172a';
+        const blockSize = CONFIG.BLOCK_SIZE; // 600
+        const roadWidth = CONFIG.ROAD_WIDTH; // 110
+        const sidewalkWidth = CONFIG.SIDEWALK_WIDTH; // 32
+        const cols = Math.floor(CONFIG.WORLD_WIDTH / blockSize);
+        const rows = Math.floor(CONFIG.WORLD_HEIGHT / blockSize);
+
+        // 1. Dasar Aspal Gelap Seluruh Dunia Permainan
+        ctx.fillStyle = '#0a0f1d';
         ctx.fillRect(0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
 
-        // Grid Blok Kota (Jalan Raya berjarak 600px)
-        const blockSize = 600;
-        const roadWidth = 90;
+        // 2. Render Blok Trotoar & Kavling Distrik
+        for (let bx = 0; bx < cols; bx++) {
+          for (let by = 0; by < rows; by++) {
+            const blockLeft = bx * blockSize + roadWidth / 2;
+            const blockRight = (bx + 1) * blockSize - roadWidth / 2;
+            const blockTop = by * blockSize + roadWidth / 2;
+            const blockBottom = (by + 1) * blockSize - roadWidth / 2;
+            const blockW = blockRight - blockLeft;
+            const blockH = blockBottom - blockTop;
 
-        for (let x = 0; x < CONFIG.WORLD_WIDTH; x += blockSize) {
-          for (let y = 0; y < CONFIG.WORLD_HEIGHT; y += blockSize) {
-            // Blok trotoar / taman di dalam grid
+            // Dasar Trotoar Beton Keliling (Sidewalk Slab)
             ctx.fillStyle = '#1e293b';
-            ctx.fillRect(x + roadWidth / 2, y + roadWidth / 2, blockSize - roadWidth, blockSize - roadWidth);
+            ctx.fillRect(blockLeft, blockTop, blockW, blockH);
 
-            // Trotoar pembatas tipis
+            // Garis Tepi Trotoar / Batu Kerb Jalan
             ctx.strokeStyle = '#334155';
             ctx.lineWidth = 3;
-            ctx.strokeRect(x + roadWidth / 2, y + roadWidth / 2, blockSize - roadWidth, blockSize - roadWidth);
+            ctx.strokeRect(blockLeft, blockTop, blockW, blockH);
+
+            // Kavling Interior di Dalam Trotoar
+            const innerLeft = blockLeft + sidewalkWidth;
+            const innerTop = blockTop + sidewalkWidth;
+            const innerW = blockW - sidewalkWidth * 2;
+            const innerH = blockH - sidewalkWidth * 2;
+
+            const isParkBlock = (bx === 1 && by === 1) || (bx === 4 && by === 4);
+            const isDowntown = (bx === 2 || bx === 3) && (by === 2 || by === 3);
+            const isCommercial = !isParkBlock && !isDowntown && (bx >= 1 && bx <= 4 && by >= 1 && by <= 4);
+
+            if (isParkBlock) {
+              // Halaman Rumput Taman Kota Asri
+              ctx.fillStyle = '#14462c';
+              ctx.fillRect(innerLeft, innerTop, innerW, innerH);
+
+              // Jalur Setapak Batu Pejalan Kaki (Cross Stone Walkways)
+              ctx.fillStyle = '#293548';
+              ctx.fillRect(innerLeft, innerTop + innerH / 2 - 14, innerW, 28);
+              ctx.fillRect(innerLeft + innerW / 2 - 14, innerTop, 28, innerH);
+
+              // Plaza Air Mancur Mini di Pusat Taman
+              ctx.fillStyle = '#1e293b';
+              ctx.beginPath();
+              ctx.arc(innerLeft + innerW / 2, innerTop + innerH / 2, 38, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#0284c7';
+              ctx.beginPath();
+              ctx.arc(innerLeft + innerW / 2, innerTop + innerH / 2, 28, 0, Math.PI * 2);
+              ctx.fill();
+
+            } else if (isDowntown) {
+              // Plaza Paving Granit Modern Downtown
+              ctx.fillStyle = '#172033';
+              ctx.fillRect(innerLeft, innerTop, innerW, innerH);
+
+              // Motif Grid Ubin Plaza
+              ctx.strokeStyle = '#223049';
+              ctx.lineWidth = 1;
+              for (let px = innerLeft + 35; px < innerLeft + innerW; px += 35) {
+                ctx.beginPath();
+                ctx.moveTo(px, innerTop);
+                ctx.lineTo(px, innerTop + innerH);
+                ctx.stroke();
+              }
+              for (let py = innerTop + 35; py < innerTop + innerH; py += 35) {
+                ctx.beginPath();
+                ctx.moveTo(innerLeft, py);
+                ctx.lineTo(innerLeft + innerW, py);
+                ctx.stroke();
+              }
+
+              // Garis Drop-off Lobby
+              ctx.strokeStyle = '#38bdf8';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(innerLeft + innerW / 2 - 80, innerTop + innerH - 50, 160, 42);
+
+            } else if (isCommercial) {
+              // Paving Distrik Bisnis & Tempat Parkir
+              ctx.fillStyle = '#1a2436';
+              ctx.fillRect(innerLeft, innerTop, innerW, innerH);
+
+              // Garis Tempat Parkir (Parking Bays)
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+              ctx.lineWidth = 2;
+              const parkX = innerLeft + innerW - 85;
+              for (let py = innerTop + 70; py <= innerTop + innerH - 70; py += 38) {
+                ctx.strokeRect(parkX, py, 75, 30);
+              }
+
+            } else {
+              // Distrik Perumahan: Rumput Halaman Depan & Jalur Masuk Mobil
+              ctx.fillStyle = '#0e301d';
+              ctx.fillRect(innerLeft, innerTop, innerW, innerH);
+
+              // Jalan Masuk Carport Beton untuk 4 Rumah
+              ctx.fillStyle = '#1e293b';
+              ctx.fillRect(innerLeft + 15, innerTop + 65, 60, 50);
+              ctx.fillRect(innerLeft + innerW - 75, innerTop + 65, 60, 50);
+              ctx.fillRect(innerLeft + 15, innerTop + innerH - 115, 60, 50);
+              ctx.fillRect(innerLeft + innerW - 75, innerTop + innerH - 115, 60, 50);
+
+              // Pagar Tanaman / Pembatas Kavling Tipis
+              ctx.strokeStyle = '#092113';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(innerLeft, innerTop + innerH / 2);
+              ctx.lineTo(innerLeft + innerW, innerTop + innerH / 2);
+              ctx.moveTo(innerLeft + innerW / 2, innerTop);
+              ctx.lineTo(innerLeft + innerW / 2, innerTop + innerH);
+              ctx.stroke();
+            }
           }
         }
 
-        // Garis Putus-putus Marka Jalan Raya
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-        ctx.lineWidth = 4;
-        ctx.setLineDash([20, 20]);
+        // 3. Marka Jalan Raya (Marka Lajur & Garis Ganda Kuning)
+        // A. Jalan Horizontal
+        for (let r = 1; r < rows; r++) {
+          const y = r * blockSize;
 
-        // Garis horizontal
-        for (let y = 0; y <= CONFIG.WORLD_HEIGHT; y += blockSize) {
+          // Garis tengah jalan ganda kuning (Double Solid Yellow)
+          ctx.strokeStyle = '#eab308';
+          ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(CONFIG.WORLD_WIDTH, y);
+          ctx.moveTo(0, y - 3);
+          ctx.lineTo(CONFIG.WORLD_WIDTH, y - 3);
+          ctx.moveTo(0, y + 3);
+          ctx.lineTo(CONFIG.WORLD_WIDTH, y + 3);
+          ctx.stroke();
+
+          // Garis batas luar jalan putih tipis
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, y - roadWidth / 2);
+          ctx.lineTo(CONFIG.WORLD_WIDTH, y - roadWidth / 2);
+          ctx.moveTo(0, y + roadWidth / 2);
+          ctx.lineTo(CONFIG.WORLD_WIDTH, y + roadWidth / 2);
           ctx.stroke();
         }
 
-        // Garis vertikal
-        for (let x = 0; x <= CONFIG.WORLD_WIDTH; x += blockSize) {
+        // B. Jalan Vertikal
+        for (let c = 1; c < cols; c++) {
+          const x = c * blockSize;
+
+          // Garis tengah jalan ganda kuning
+          ctx.strokeStyle = '#eab308';
+          ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, CONFIG.WORLD_HEIGHT);
+          ctx.moveTo(x - 3, 0);
+          ctx.lineTo(x - 3, CONFIG.WORLD_HEIGHT);
+          ctx.moveTo(x + 3, 0);
+          ctx.lineTo(x + 3, CONFIG.WORLD_HEIGHT);
+          ctx.stroke();
+
+          // Garis batas luar jalan putih tipis
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x - roadWidth / 2, 0);
+          ctx.lineTo(x - roadWidth / 2, CONFIG.WORLD_HEIGHT);
+          ctx.moveTo(x + roadWidth / 2, 0);
+          ctx.lineTo(x + roadWidth / 2, CONFIG.WORLD_HEIGHT);
           ctx.stroke();
         }
 
-        ctx.setLineDash([]); // Reset dash
+        // 4. Zebra Crossings & Garis Henti di Setiap Persimpangan Jalan
+        const zebraW = 28;
+        const zebraDist = roadWidth / 2 + 10;
+
+        for (let c = 1; c < cols; c++) {
+          for (let r = 1; r < rows; r++) {
+            const ix = c * blockSize;
+            const iy = r * blockSize;
+
+            // Kotak aspal persimpangan
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(ix - roadWidth / 2, iy - roadWidth / 2, roadWidth, roadWidth);
+
+            ctx.fillStyle = '#f8fafc';
+
+            // Penyeberangan Utara
+            for (let bx = -roadWidth / 2 + 8; bx < roadWidth / 2 - 8; bx += 14) {
+              ctx.fillRect(ix + bx, iy - zebraDist - 16, 7, zebraW);
+            }
+            // Garis stop utara
+            ctx.fillRect(ix - roadWidth / 2 + 6, iy - zebraDist - 22, roadWidth - 12, 4);
+
+            // Penyeberangan Selatan
+            for (let bx = -roadWidth / 2 + 8; bx < roadWidth / 2 - 8; bx += 14) {
+              ctx.fillRect(ix + bx, iy + zebraDist - 12, 7, zebraW);
+            }
+            // Garis stop selatan
+            ctx.fillRect(ix - roadWidth / 2 + 6, iy + zebraDist + 18, roadWidth - 12, 4);
+
+            // Penyeberangan Barat
+            for (let by = -roadWidth / 2 + 8; by < roadWidth / 2 - 8; by += 14) {
+              ctx.fillRect(ix - zebraDist - 16, iy + by, zebraW, 7);
+            }
+            // Garis stop barat
+            ctx.fillRect(ix - zebraDist - 22, iy - roadWidth / 2 + 6, 4, roadWidth - 12);
+
+            // Penyeberangan Timur
+            for (let by = -roadWidth / 2 + 8; by < roadWidth / 2 - 8; by += 14) {
+              ctx.fillRect(ix + zebraDist - 12, iy + by, zebraW, 7);
+            }
+            // Garis stop timur
+            ctx.fillRect(ix + zebraDist + 18, iy - roadWidth / 2 + 6, 4, roadWidth - 12);
+          }
+        }
       }
 
       // Render Radar Mini di pojok kanan bawah
@@ -1850,27 +2794,59 @@
         mCtx.clearRect(0, 0, mw, mh);
 
         // Latar belakang minimap
-        mCtx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        mCtx.fillStyle = 'rgba(15, 23, 42, 0.92)';
         mCtx.fillRect(0, 0, mw, mh);
 
         const scaleX = mw / CONFIG.WORLD_WIDTH;
         const scaleY = mh / CONFIG.WORLD_HEIGHT;
 
+        // Gambar Grid Jalan Raya di Minimap
+        mCtx.strokeStyle = 'rgba(51, 65, 85, 0.7)';
+        mCtx.lineWidth = 1;
+        const blockSize = CONFIG.BLOCK_SIZE;
+        for (let x = blockSize; x < CONFIG.WORLD_WIDTH; x += blockSize) {
+          mCtx.beginPath();
+          mCtx.moveTo(x * scaleX, 0);
+          mCtx.lineTo(x * scaleX, mh);
+          mCtx.stroke();
+        }
+        for (let y = blockSize; y < CONFIG.WORLD_HEIGHT; y += blockSize) {
+          mCtx.beginPath();
+          mCtx.moveTo(0, y * scaleY);
+          mCtx.lineTo(mw, y * scaleY);
+          mCtx.stroke();
+        }
+
         // Titik-titik objek kota
-        mCtx.fillStyle = 'rgba(148, 163, 184, 0.5)';
         for (let i = 0; i < this.objects.length; i += 2) {
           const obj = this.objects[i];
-          mCtx.fillRect(obj.x * scaleX, obj.y * scaleY, 1.5, 1.5);
+          if (obj.category === 'LARGE') {
+            mCtx.fillStyle = '#38bdf8';
+            mCtx.fillRect(obj.x * scaleX - 1.5, obj.y * scaleY - 1.5, 3, 3);
+          } else if (obj.category === 'MEDIUM') {
+            mCtx.fillStyle = '#f59e0b';
+            mCtx.fillRect(obj.x * scaleX - 1, obj.y * scaleY - 1, 2, 2);
+          } else {
+            mCtx.fillStyle = 'rgba(148, 163, 184, 0.5)';
+            mCtx.fillRect(obj.x * scaleX, obj.y * scaleY, 1, 1);
+          }
         }
 
         // Posisi Lubang Hitam Pemain (Titik Cyan Terang Berkedip)
-        mCtx.fillStyle = '#38bdf8';
+        mCtx.fillStyle = '#00f2fe';
         mCtx.beginPath();
-        mCtx.arc(this.player.x * scaleX, this.player.y * scaleY, Math.max(2.5, this.player.radius * scaleX * 1.5), 0, Math.PI * 2);
+        mCtx.arc(this.player.x * scaleX, this.player.y * scaleY, Math.max(3, this.player.radius * scaleX * 1.5), 0, Math.PI * 2);
         mCtx.fill();
 
+        // Lingkaran jangkauan hisap di minimap
+        mCtx.strokeStyle = 'rgba(0, 242, 254, 0.5)';
+        mCtx.lineWidth = 1;
+        mCtx.beginPath();
+        mCtx.arc(this.player.x * scaleX, this.player.y * scaleY, Math.max(4, this.player.radius * scaleX), 0, Math.PI * 2);
+        mCtx.stroke();
+
         // Bingkai radar
-        mCtx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+        mCtx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
         mCtx.lineWidth = 1.5;
         mCtx.strokeRect(0, 0, mw, mh);
       }
